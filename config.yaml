@@ -1,0 +1,43 @@
+# CSI Training Configuration
+# Used by 01_tokenization.ipynb and 02_training.ipynb
+
+# ── Paths ────────────────────────────────────────────────────────────────────
+data_dir: datasets
+unified_jsonl: datasets/UNIFIED.jsonl
+mappings_json: datasets/UNIFIED_mappings.json
+token_cache_dir: datasets/token_cache
+checkpoint_dir: checkpoints
+log_dir: logs
+
+# ── Model ────────────────────────────────────────────────────────────────────
+model_name: microsoft/graphcodebert-base
+num_cwe_classes: 8
+hidden_size: 768
+
+# ── LoRA ─────────────────────────────────────────────────────────────────────
+lora_r: 8
+lora_alpha: 16
+lora_dropout: 0.1
+lora_target_modules:
+  - query
+  - value
+
+# ── Tokenization ─────────────────────────────────────────────────────────────
+max_length: 512
+tokenizer_batch_size: 64
+
+# ── Training ─────────────────────────────────────────────────────────────────
+batch_size: 16
+epochs: 5
+learning_rate: 2.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_grad_norm: 1.0
+seed: 42
+
+# ── Checkpointing ────────────────────────────────────────────────────────────
+save_every_n_steps: 200
+early_stopping_patience: 3
+
+# ── Logging ──────────────────────────────────────────────────────────────────
+log_every_n_steps: 50
