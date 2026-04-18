@@ -107,7 +107,7 @@ Total after preprocessing: ~4,000+ deduplicated functions with CWE labels.
 
 ## Team & Phases
 
-**9 members**: Anas Elhaag (lead), Farida Hassan, Hend Elhout, Hesham Mahmoud, Jomana Mekheimar, Menna Amr, Menna Reda, Sohaila Tamer, Youstina Adel.
+**10 members**: Anas Elhaag (lead), Farida Hassan, Hend Elhout, Hesham Mahmoud, Jomana Mekheimar, Menna Amr, Menna Reda, Sohaila Tamer, Thjumana, Youstina Adel.
 
 ### Phase Status
 - **Phase 1 (Data + Model Setup)**: ✅ COMPLETE
