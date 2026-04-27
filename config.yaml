@@ -1,11 +1,12 @@
 # CSI Training Configuration
-# Used by 01_tokenization.ipynb and 02_training.ipynb
+# Used by 01_tokenization.ipynb, 02_training.ipynb, and dont_touch_it/train.py
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 data_dir: datasets
 unified_jsonl: datasets/UNIFIED.jsonl
 mappings_json: datasets/UNIFIED_mappings.json
 token_cache_dir: datasets/token_cache
+token_cache_file: datasets/token_cache/tokens_maxlen512.pt
 checkpoint_dir: checkpoints
 log_dir: logs
 
@@ -14,30 +15,55 @@ model_name: microsoft/graphcodebert-base
 num_cwe_classes: 8
 hidden_size: 768
 
-# ── LoRA ─────────────────────────────────────────────────────────────────────
-lora_r: 8
-lora_alpha: 16
+# ── LoRA (baseline — overridden per sweep run) ───────────────────────────────
+lora_r: 16
+lora_alpha: 32
 lora_dropout: 0.1
 lora_target_modules:
   - query
+  - key
   - value
 
-# ── Tokenization ─────────────────────────────────────────────────────────────
+# ── Tokenization (already done — do not re-run) ──────────────────────────────
 max_length: 512
+chunk_stride: 256
 tokenizer_batch_size: 64
 
-# ── Training ─────────────────────────────────────────────────────────────────
-batch_size: 16
-epochs: 5
+# ── Training (baseline — overridden per sweep run) ───────────────────────────
+batch_size: 8
+epochs: 10
 learning_rate: 2.0e-5
 weight_decay: 0.01
-warmup_ratio: 0.1
+warmup_ratio: 0.2
 max_grad_norm: 1.0
 seed: 42
-
-# ── Checkpointing ────────────────────────────────────────────────────────────
-save_every_n_steps: 200
 early_stopping_patience: 3
-
-# ── Logging ──────────────────────────────────────────────────────────────────
+save_every_n_steps: 200
 log_every_n_steps: 50
+
+# ── AMP (Colab T4/A100) — auto-disabled on CPU/MPS ───────────────────────────
+use_amp: true
+
+# ── Focal Loss ───────────────────────────────────────────────────────────────
+focal_gamma: 2.0
+
+# ── SCL (Supervised Contrastive Learning) ────────────────────────────────────
+scl_weight: 0.3
+scl_temperature: 0.07
+
+# ── R-Drop ───────────────────────────────────────────────────────────────────
+rdrop_alpha: 4.0
+
+# ── EDAT (Embedding-space Data Augmentation Training) ────────────────────────
+edat_enabled: true
+edat_epsilon: 0.01
+edat_steps: 3
+edat_step_size: 0.005
+edat_kl_weight: 1.0
+
+# ── Experiment Sweep Grid (dont_touch_it/train.py --run-sweep) ───────────────
+sweep:
+  batch_size: [4, 8]
+  learning_rate: [1.0e-5, 2.0e-5, 5.0e-5]
+  lora_r: [4, 8, 16]
+  focal_gamma: [1.0, 2.0, 3.0]

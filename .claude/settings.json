@@ -5,7 +5,10 @@
       "Bash(python3 -c \"import json; nb=json.load\\(open\\('/Users/anas/Projects/code-security-identifier/03_unified_mapping.ipynb'\\)\\); print\\(f'Valid — {len\\(nb[\\\\\"cells\\\\\"]\\)} cells'\\)\")",
       "mcp__code-review-graph__build_or_update_graph_tool",
       "Read(//content/drive/MyDrive/CSI_Project/**)",
-      "WebFetch(domain:drive.google.com)"
+      "WebFetch(domain:drive.google.com)",
+      "Bash(jupyter nbconvert *)",
+      "Bash(python3 -c \"import json,sys; nb=json.load\\(open\\('/Users/anas/Projects/code-security-identifier/02_training.ipynb'\\)\\); [print\\('===CELL',i,c['cell_type']\\);print\\(''.join\\(c['source']\\)\\) for i,c in enumerate\\(nb['cells']\\)]\")",
+      "Bash(python3 -c \"import json; nb=json.load\\(open\\('/Users/anas/Projects/code-security-identifier/04_ultimate_training.ipynb'\\)\\); print\\('cells:',len\\(nb['cells']\\)\\); print\\('valid JSON OK'\\)\")"
     ]
   }
 }
