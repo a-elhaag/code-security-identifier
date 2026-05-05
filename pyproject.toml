@@ -1,0 +1,26 @@
+[project]
+name = "code-security-identifier"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "streamlit==1.57.0",
+    "torch==2.11.0",
+    "transformers==5.8.0",
+    "peft==0.19.1",
+    "sentencepiece>=0.2.0",
+    "accelerate>=1.0.0",
+]
+
+[tool.uv]
+# Pull CPU-only torch — avoids downloading 2.5 GB CUDA wheels
+index-url = "https://pypi.org/simple"
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu" },
+]
