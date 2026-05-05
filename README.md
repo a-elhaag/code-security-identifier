@@ -5,6 +5,7 @@
 ## Overview
 
 CSI performs simultaneous multi-task vulnerability detection on Python code:
+
 - **Binary classification**: vulnerable vs. secure
 - **CWE classification**: maps to specific weakness types
 - **Severity scoring**: CVSS-style risk quantification
@@ -37,6 +38,7 @@ Output (7-class logits + cross-entropy loss)
 ```
 
 **Phase 1** (Current):
+
 - ✅ Dataset pipeline: preprocessing, deduplication, quality validation
 - ✅ LoRA-wrapped model: GraphCodeBERT + lightweight CWE head
 - ✅ Unified dataset: cross-reference mappings for train/val splits
@@ -47,6 +49,7 @@ Output (7-class logits + cross-entropy loss)
 ## Data
 
 ### Datasets
+
 - **Vudenc** (~1,775 functions): Python-native, statement-level labels
 - **Function-level dataset**: Buggy and fixed code pairs with CWE annotations
 - **SecurityEval** (~100 functions): Additional test set
@@ -55,13 +58,16 @@ Output (7-class logits + cross-entropy loss)
 Total after preprocessing: ~4,000+ deduplicated functions with CWE labels.
 
 ### Preprocessing Pipeline
+
 3-stage Jupyter notebook pipeline (runs locally or in Colab with Google Drive):
 
 **Stage 1: `00_setup.ipynb`** → Install dependencies + download HuggingFace models
+
 - Downloads `microsoft/graphcodebert-base` and `microsoft/codebert-base`
 - Caches to Google Drive (`CSI_Project/models/`) to avoid re-downloading
 
 **Stage 2: `01_dataset_pipeline_local.ipynb`** → Combine + deduplicate + split
+
 - Loads 3 raw datasets
 - **Deduplication**: SHA256 hash of (code_lines, label, cwe_id) tuple; removes exact duplicates from function-level dataset
 - **CWE Extraction** (2-strategy):
@@ -70,6 +76,7 @@ Total after preprocessing: ~4,000+ deduplicated functions with CWE labels.
 - **Output**: FINAL_train.jsonl (~90% split), FINAL_val.jsonl (~10% split)
 
 **Stage 3: `02_validation_analysis.ipynb`** → Quality gate enforcement
+
 - Validates record structure (required fields: lines, label, cwe_id, dataset_source, etc.)
 - Enforces quality thresholds:
   - Duplicates: <15% (reduced from 16.64% via dedup)
@@ -79,6 +86,7 @@ Total after preprocessing: ~4,000+ deduplicated functions with CWE labels.
 - Outputs: Quality metrics JSON, final PASS/FAIL status
 
 **Stage 4: `03_unified_mapping.ipynb`** → Unify + verify + model definition
+
 - Loads FINAL_train.jsonl + FINAL_val.jsonl
 - Validates identical record structure across splits
 - Normalizes records with metadata: record_id, split_origin, global_id, num_statements, num_vulnerable
@@ -88,6 +96,7 @@ Total after preprocessing: ~4,000+ deduplicated functions with CWE labels.
 - Instantiates GraphCodeBERTLoRACWEModel with 7-class CWE head
 
 ### Record Structure
+
 ```json
 {
   "lines": [...],                    # code lines as list of strings
@@ -107,14 +116,14 @@ Total after preprocessing: ~4,000+ deduplicated functions with CWE labels.
 
 ## Team & Phases
 
-**10 members**: Anas Elhaag (lead), Farida Hassan, Hend Elhout, Hesham Mahmoud, Jomana Mekheimar, Menna Amr, Menna Reda, Sohaila Tamer, Thjumana, Youstina Adel.
+**10 members**: Anas Elhaag (lead), Farida Hassan, Hend Elhout, Hesham Mahmoud, Jomana Mekheimar, Menna Amr, Menna Reda, Sohaila Tamer, Youstina Adel.
 
 ### Phase Status
+
 - **Phase 1 (Data + Model Setup)**: ✅ COMPLETE
   - Dataset pipeline: collect, preprocess, deduplicate, validate
   - Model architecture: LoRA-wrapped GraphCodeBERT + 7-class CWE head
   - Unified dataset: cross-referenced train/val splits ready for training
-  
 - **Phase 2 (Training + Evaluation)**: ⏳ IN PROGRESS
   - Supervised fine-tuning on unified dataset
   - Evaluate F1, precision, recall on held-out validation split
@@ -123,18 +132,22 @@ Total after preprocessing: ~4,000+ deduplicated functions with CWE labels.
 ## Setup
 
 ### Prerequisites
+
 - Python 3.9+
 - PyTorch 2.0+
 - Transformers 4.30+
 - Google Colab (recommended) or local GPU
 
 ### Google Colab
+
 ```bash
 python colab_setup.py
 ```
+
 Initializes environment, mounts Google Drive, downloads datasets to `CSI_Project/datasets/`.
 
 ### Local
+
 ```bash
 pip install -r requirements.txt
 python src/download_datasets.py --output_dir ./data
@@ -143,16 +156,18 @@ python src/download_datasets.py --output_dir ./data
 ## Key Files
 
 ### Notebooks (Main Entry Points)
+
 - **`00_setup.ipynb`**: Install dependencies, download HuggingFace models, cache to Google Drive
 - **`01_dataset_pipeline_local.ipynb`**: Load raw datasets → deduplicate → split → FINAL_train.jsonl + FINAL_val.jsonl
 - **`02_validation_analysis.ipynb`**: Validate structure, enforce quality thresholds, output metrics
-- **`03_unified_mapping.ipynb`**: 
+- **`03_unified_mapping.ipynb`**:
   - Unify train/val splits → UNIFIED.jsonl
   - Create cross-reference mappings → UNIFIED_mappings.json
   - Define GraphCodeBERTLoRACWEModel + smoke test
   - Save metadata → UNIFIED_metadata.json
 
 ### Project Structure
+
 ```
 code-security-identifier/
 ├── 00_setup.ipynb                              # Environment + model download
@@ -191,11 +206,13 @@ code-security-identifier/
 ## Benchmark Target
 
 **Phase 1 Goal** (Current): Build complete data pipeline + validate model architecture
-- ✅ Deduplicated dataset: <15% duplicates, <35% unknown CWE  
+
+- ✅ Deduplicated dataset: <15% duplicates, <35% unknown CWE
 - ✅ LoRA model: 0.24% trainable params (300K / 124M)
 - ✅ Unified dataset: cross-referenced train/val ready for fine-tuning
 
 **Phase 2 Goal**: Fine-tune on unified dataset
+
 - Target: Early stopping when validation loss plateaus
 - Evaluate via CWE classification accuracy on held-out val split
 - Option: Extend to statement-level binary classification with supervised contrastive loss
@@ -203,6 +220,7 @@ code-security-identifier/
 ## Quick Start
 
 ### Option 1: Local Development
+
 ```bash
 # Clone repo
 git clone https://github.com/a-elhaag/code-security-identifier.git
@@ -216,6 +234,7 @@ jupyter notebook 03_unified_mapping.ipynb           # Unify + define model
 ```
 
 ### Option 2: Google Colab (Recommended)
+
 1. Upload notebooks to Colab
 2. Mount Google Drive (notebooks auto-detect paths)
 3. Run cells sequentially:
@@ -225,6 +244,7 @@ jupyter notebook 03_unified_mapping.ipynb           # Unify + define model
    - `03_unified_mapping.ipynb` → creates UNIFIED.jsonl + model
 
 ### Load Unified Dataset & Model
+
 ```python
 import json
 from pathlib import Path
@@ -239,7 +259,7 @@ print(f"Loaded {len(unified):,} records")
 
 # Example: get all vulnerable functions from train split
 vulnerable_train = [
-    r for r in unified 
+    r for r in unified
     if r["split_origin"] == "train" and r["is_vulnerable"]
 ]
 print(f"Vulnerable in train: {len(vulnerable_train):,}")
@@ -254,6 +274,7 @@ print(f"SQL injection functions: {len(sql_injection):,}")
 ```
 
 ### Train the Model
+
 ```python
 import torch
 from pathlib import Path
@@ -271,16 +292,16 @@ class VulnerabilityDataset(Dataset):
         self.records = records
         self.tokenizer = tokenizer
         self.max_length = max_length
-    
+
     def __len__(self):
         return len(self.records)
-    
+
     def __getitem__(self, idx):
         record = self.records[idx]
         code = " ".join(record["lines"])
         cwe_id = record["cwe_id"]
         target = map_cwe_to_target(cwe_id)  # Returns 0-6 or -1
-        
+
         encoded = self.tokenizer(
             code,
             max_length=self.max_length,
@@ -288,7 +309,7 @@ class VulnerabilityDataset(Dataset):
             truncation=True,
             return_tensors="pt"
         )
-        
+
         return {
             "input_ids": encoded["input_ids"].squeeze(0),
             "attention_mask": encoded["attention_mask"].squeeze(0),
@@ -320,6 +341,7 @@ for epoch in range(3):
 ## Research References
 
 Core papers:
+
 - **GraphCodeBERT** (Guo et al., 2020): Pre-trained encoder for code understanding via AST + data/control flow
 - **LoRA** (Hu et al., 2021): Low-rank adaptation for efficient fine-tuning of large models
 - **PEFT** (Mangrulkar et al., 2023): Parameter-efficient fine-tuning library (PyTorch)
