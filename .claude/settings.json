@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ' *)",
+      "Bash(grep -E \"\\\\.ipynb$\")",
+      "Bash(grep -E \"\\\\.\\(ipynb|py\\)$\")",
+      "Bash(/Users/anas/Projects/code-security-identifier/.venv/bin/python -c ' *)",
+      "Bash(/Users/anas/Projects/code-security-identifier/.venv/bin/pip list *)",
+      "Bash(/Users/anas/Projects/code-security-identifier/.venv/bin/python)",
+      "Bash(/Users/anas/Projects/code-security-identifier/.venv/bin/pip install *)",
+      "Bash(/Users/anas/Projects/code-security-identifier/.venv/bin/python -c \"import torch; print\\('torch:', torch.__version__\\); print\\('MPS available:', torch.backends.mps.is_available\\(\\)\\)\")",
+      "Bash(python3)"
+    ]
+  }
+}
