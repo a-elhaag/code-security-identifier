@@ -1,6 +1,7 @@
 [project]
 name = "code-security-identifier"
 version = "0.1.0"
+description = "Streamlit ML app for code security vulnerability detection"
 requires-python = ">=3.12"
 dependencies = [
     "streamlit==1.57.0",
@@ -10,10 +11,6 @@ dependencies = [
     "sentencepiece>=0.2.0",
     "accelerate>=1.0.0",
 ]
-
-[tool.uv]
-# Pull CPU-only torch — avoids downloading 2.5 GB CUDA wheels
-index-url = "https://pypi.org/simple"
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
