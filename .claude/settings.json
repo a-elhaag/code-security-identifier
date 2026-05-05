@@ -9,7 +9,8 @@
       "Bash(/Users/anas/Projects/code-security-identifier/.venv/bin/python)",
       "Bash(/Users/anas/Projects/code-security-identifier/.venv/bin/pip install *)",
       "Bash(/Users/anas/Projects/code-security-identifier/.venv/bin/python -c \"import torch; print\\('torch:', torch.__version__\\); print\\('MPS available:', torch.backends.mps.is_available\\(\\)\\)\")",
-      "Bash(python3)"
+      "Bash(python3)",
+      "Bash(node .agents/skills/impeccable/scripts/load-context.mjs)"
     ]
   }
 }

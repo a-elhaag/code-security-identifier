@@ -264,122 +264,195 @@ def analyze_file_dual(code: str):
 st.markdown(
     """
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
 
         :root {
             --dark-teal: #102a2e;
+            --dark-teal-mid: #1a3d43;
             --teal: #49c5b1;
+            --teal-muted: rgba(73,197,177,0.12);
+            --teal-glow: rgba(73,197,177,0.18);
             --light-green: #d4ec8e;
-            --canvas: #FBFBFA;
-            --surface: #FFFFFF;
-            --border: #EAEAEA;
-            --text-primary: #111111;
-            --text-secondary: #787774;
-            --radius: 12px;
-            --font-sans: 'SF Pro Display', 'Helvetica Neue', 'Switzer', sans-serif;
-            --font-serif: 'Newsreader', 'Instrument Serif', 'Playfair Display', serif;
-            --font-mono: 'SF Mono', 'JetBrains Mono', 'Geist Mono', monospace;
+            --light-green-muted: rgba(212,236,142,0.18);
+            --canvas: #f5f6f4;
+            --surface: #ffffff;
+            --surface-raised: #fafaf9;
+            --border: #e2e4e0;
+            --border-strong: #c8cbc5;
+            --text-primary: #111a18;
+            --text-secondary: #6b7570;
+            --text-tertiary: #9ba49f;
+            --radius-sm: 10px;
+            --radius: 20px;
+            --radius-lg: 28px;
+            --font-sans: 'Inter', 'SF Pro Display', 'Helvetica Neue', sans-serif;
+            --font-serif: 'Newsreader', 'Georgia', serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+            --shadow-sm: 0 1px 3px rgba(16,42,46,0.06), 0 1px 2px rgba(16,42,46,0.04);
+            --shadow-md: 0 4px 16px rgba(16,42,46,0.08), 0 1px 4px rgba(16,42,46,0.05);
+            --shadow-lg: 0 8px 32px rgba(16,42,46,0.10), 0 2px 8px rgba(16,42,46,0.06);
         }
 
         html, body, [class*="css"] {
             font-family: var(--font-sans) !important;
             color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
         }
 
         .stApp {
             background: var(--canvas);
         }
 
+        /* ── Main content width ── */
+        .main .block-container {
+            max-width: 1100px !important;
+            padding: 2rem 2.5rem 4rem !important;
+        }
+
         /* ── Header ── */
         .app-header {
-            border-bottom: 1px solid var(--border);
-            padding: 2.5rem 0 2rem;
+            padding: 2.5rem 0 2.25rem;
             margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        .app-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, var(--border-strong), var(--border), transparent);
+        }
+
+        .app-header-eyebrow {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--teal);
+            margin: 0 0 0.6rem;
+            font-family: var(--font-sans);
         }
 
         .app-header h1 {
             font-family: var(--font-serif);
-            font-size: 2.4rem;
+            font-size: 2.6rem;
             font-weight: 600;
             letter-spacing: -0.03em;
-            line-height: 1.1;
+            line-height: 1.08;
             color: var(--dark-teal);
-            margin: 0 0 0.4rem;
+            margin: 0 0 0.55rem;
         }
 
         .app-header p {
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             color: var(--text-secondary);
             margin: 0;
-            letter-spacing: 0.01em;
+            letter-spacing: 0.005em;
+            line-height: 1.5;
+        }
+
+        /* ── Model info panel ── */
+        .model-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem 1.75rem;
+            box-shadow: var(--shadow-sm);
         }
 
         /* ── Textarea ── */
         .stTextArea textarea {
             border-radius: var(--radius) !important;
             padding: 1rem 1.25rem !important;
-            border: 1px solid var(--border) !important;
+            border: 1.5px solid var(--border) !important;
             background: var(--surface) !important;
             font-family: var(--font-mono) !important;
-            font-size: 0.875rem !important;
+            font-size: 0.82rem !important;
+            line-height: 1.7 !important;
             color: var(--text-primary) !important;
-            box-shadow: none !important;
-            transition: border-color 160ms ease !important;
+            box-shadow: var(--shadow-sm) !important;
+            transition: border-color 180ms ease, box-shadow 180ms ease !important;
+            resize: vertical !important;
         }
 
         .stTextArea textarea:focus {
             border-color: var(--teal) !important;
-            box-shadow: 0 0 0 3px rgba(73,197,177,0.08) !important;
+            box-shadow: var(--shadow-sm), 0 0 0 4px var(--teal-glow) !important;
+            outline: none !important;
+        }
+
+        .stTextArea textarea::placeholder {
+            color: var(--text-tertiary) !important;
         }
 
         /* ── Primary button ── */
         .stButton > button {
             width: 100%;
-            border-radius: 6px !important;
-            padding: 0.6rem 1.5rem !important;
+            border-radius: var(--radius-sm) !important;
+            padding: 0.7rem 1.5rem !important;
             background: var(--dark-teal) !important;
             color: #ffffff !important;
             border: none !important;
             font-family: var(--font-sans) !important;
             font-weight: 600 !important;
-            font-size: 0.9rem !important;
-            letter-spacing: 0.01em !important;
-            box-shadow: none !important;
-            transition: background 160ms ease, transform 100ms ease !important;
+            font-size: 0.875rem !important;
+            letter-spacing: 0.015em !important;
+            box-shadow: 0 1px 3px rgba(16,42,46,0.25), 0 4px 12px rgba(16,42,46,0.15) !important;
+            transition: background 150ms ease, box-shadow 150ms ease, transform 100ms ease !important;
         }
 
         .stButton > button:hover {
-            background: #1d3d42 !important;
+            background: var(--dark-teal-mid) !important;
+            box-shadow: 0 2px 6px rgba(16,42,46,0.3), 0 6px 20px rgba(16,42,46,0.18) !important;
         }
 
         .stButton > button:active {
-            transform: scale(0.98) !important;
+            transform: scale(0.985) !important;
+            box-shadow: 0 1px 2px rgba(16,42,46,0.2) !important;
         }
 
         /* ── Result card ── */
         .result-container {
             background: var(--surface);
-            padding: 1.75rem 2rem;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            margin-top: 1.5rem;
+            padding: 2rem 2.25rem;
+            border-radius: var(--radius-lg);
+            border: 1.5px solid var(--border);
+            margin-top: 1.75rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--teal), var(--light-green));
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
         }
 
         .result-container h3 {
             font-family: var(--font-serif);
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 600;
             letter-spacing: -0.02em;
             color: var(--dark-teal);
-            margin: 0 0 1rem;
+            margin: 0.25rem 0 1.25rem;
         }
 
-        /* ── Tabs ── */
+        /* ── Tabs (top-level) ── */
         .stTabs [data-baseweb="tab-list"] {
-            background: transparent !important;
-            border-bottom: 1px solid var(--border) !important;
-            gap: 0 !important;
-            padding: 0 !important;
+            background: var(--surface) !important;
+            border: 1.5px solid var(--border) !important;
+            border-radius: var(--radius) !important;
+            gap: 4px !important;
+            padding: 5px !important;
+            box-shadow: var(--shadow-sm) !important;
+            margin-bottom: 1.75rem !important;
         }
 
         button[data-baseweb="tab"] {
@@ -388,33 +461,73 @@ st.markdown(
             font-weight: 500 !important;
             color: var(--text-secondary) !important;
             background: transparent !important;
-            border-radius: 0 !important;
-            border-bottom: 2px solid transparent !important;
-            padding: 0.6rem 1.25rem !important;
-            transition: color 160ms ease !important;
+            border-radius: 14px !important;
+            border: none !important;
+            padding: 0.5rem 1.5rem !important;
+            transition: color 150ms ease, background 150ms ease !important;
         }
 
-        button[data-baseweb="tab"]:hover { color: var(--text-primary) !important; }
+        button[data-baseweb="tab"]:hover {
+            color: var(--text-primary) !important;
+            background: var(--canvas) !important;
+        }
 
         button[data-baseweb="tab"][aria-selected="true"] {
             color: var(--dark-teal) !important;
-            border-bottom-color: var(--teal) !important;
+            background: var(--dark-teal) !important;
+            color: #ffffff !important;
             font-weight: 600 !important;
+            box-shadow: 0 1px 4px rgba(16,42,46,0.2) !important;
+        }
+
+        /* ── Sub-tabs (Paste / Upload) ── */
+        .stTabs .stTabs [data-baseweb="tab-list"] {
+            background: transparent !important;
+            border: none !important;
+            border-bottom: 1.5px solid var(--border) !important;
+            border-radius: 0 !important;
+            gap: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            margin-bottom: 1rem !important;
+        }
+
+        .stTabs .stTabs button[data-baseweb="tab"] {
+            border-radius: 0 !important;
+            border-bottom: 2px solid transparent !important;
+            padding: 0.55rem 1rem !important;
+            background: transparent !important;
+            color: var(--text-secondary) !important;
+            font-size: 0.82rem !important;
+        }
+
+        .stTabs .stTabs button[data-baseweb="tab"][aria-selected="true"] {
+            background: transparent !important;
+            color: var(--dark-teal) !important;
+            border-bottom-color: var(--teal) !important;
+            box-shadow: none !important;
         }
 
         /* ── Alerts ── */
         div[data-testid="stAlert"] {
             border-radius: var(--radius) !important;
-            border: 1px solid var(--border) !important;
+            border: 1.5px solid var(--border) !important;
             background: var(--surface) !important;
             font-size: 0.875rem !important;
+            box-shadow: var(--shadow-sm) !important;
         }
 
         /* ── Expander ── */
         div[data-testid="stExpander"] {
-            border: 1px solid var(--border) !important;
+            border: 1.5px solid var(--border) !important;
             border-radius: var(--radius) !important;
             background: var(--surface) !important;
+            box-shadow: var(--shadow-sm) !important;
+            overflow: hidden !important;
+        }
+
+        div[data-testid="stExpander"]:hover {
+            border-color: var(--border-strong) !important;
         }
 
         /* ── File uploader ── */
@@ -422,11 +535,40 @@ st.markdown(
             border-radius: var(--radius) !important;
         }
 
+        div[data-testid="stFileUploader"] > div {
+            border-radius: var(--radius) !important;
+            border: 1.5px dashed var(--border-strong) !important;
+            background: var(--surface-raised) !important;
+            transition: border-color 150ms ease, background 150ms ease !important;
+        }
+
+        div[data-testid="stFileUploader"] > div:hover {
+            border-color: var(--teal) !important;
+            background: var(--teal-muted) !important;
+        }
+
         /* ── Code blocks ── */
-        code, pre { font-family: var(--font-mono) !important; font-size: 0.82rem !important; }
+        code, pre {
+            font-family: var(--font-mono) !important;
+            font-size: 0.8rem !important;
+        }
+
+        div[data-testid="stCode"] {
+            border-radius: var(--radius) !important;
+            overflow: hidden !important;
+        }
 
         /* ── Divider ── */
-        hr { border: none !important; border-top: 1px solid var(--border) !important; margin: 2rem 0 !important; }
+        hr {
+            border: none !important;
+            border-top: 1px solid var(--border) !important;
+            margin: 2rem 0 !important;
+        }
+
+        /* ── Spinner ── */
+        div[data-testid="stSpinner"] > div {
+            border-top-color: var(--teal) !important;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -439,8 +581,9 @@ st.markdown(
 st.markdown(
     """
     <div class="app-header">
+        <p class="app-header-eyebrow">Security Analysis</p>
         <h1>Code Security Identifier</h1>
-        <p>Static vulnerability detection via GraphCodeBERT &middot; 8 CWE classes</p>
+        <p>Static vulnerability detection powered by GraphCodeBERT and VulBERTa &middot; 8 CWE classes</p>
     </div>
     """,
     unsafe_allow_html=True,
@@ -455,19 +598,24 @@ def _render_result(prediction: str, probs: dict):
     is_safe = prediction == "unknown"
 
     if is_safe:
-        badge_bg, badge_text = "#EDF3EC", "#346538"
+        badge_bg   = "rgba(73,197,177,0.14)"
+        badge_text = "#0d7a6a"
+        badge_dot  = "#49c5b1"
     else:
-        badge_bg, badge_text = "#FDEBEC", "#9F2F2D"
+        badge_bg   = "rgba(220,60,60,0.10)"
+        badge_text = "#a02020"
+        badge_dot  = "#dc3c3c"
 
     top3 = sorted(probs.items(), key=lambda x: x[1], reverse=True)[:3]
-    bar_color = "#49c5b1" if is_safe else "#e05c5c"
+    bar_fill = "linear-gradient(90deg,#49c5b1,#d4ec8e)" if is_safe else "linear-gradient(90deg,#e05c5c,#f0a060)"
+
     top3_html = "".join(
-        f'<div style="display:flex;align-items:center;gap:12px;margin:6px 0;">'
-        f'<span style="width:80px;font-size:0.78rem;font-weight:600;color:var(--text-secondary);font-family:var(--font-mono);letter-spacing:0.02em;">{lbl}</span>'
-        f'<div style="flex:1;background:#F3F3F2;border-radius:3px;height:5px;">'
-        f'<div style="width:{pct}%;background:{bar_color};border-radius:3px;height:5px;transition:width 400ms ease;"></div>'
+        f'<div style="display:flex;align-items:center;gap:14px;margin:10px 0;">'
+        f'<span style="width:72px;font-size:0.76rem;font-weight:600;color:var(--text-secondary);font-family:var(--font-mono);letter-spacing:0.03em;flex-shrink:0;">{lbl}</span>'
+        f'<div style="flex:1;background:#edeeed;border-radius:99px;height:6px;overflow:hidden;">'
+        f'<div style="width:{pct}%;background:{bar_fill};border-radius:99px;height:6px;transition:width 500ms cubic-bezier(0.16,1,0.3,1);"></div>'
         f'</div>'
-        f'<span style="font-size:0.78rem;color:var(--text-secondary);width:38px;text-align:right;">{pct}%</span>'
+        f'<span style="font-size:0.76rem;font-weight:600;color:var(--text-secondary);width:36px;text-align:right;font-family:var(--font-mono);">{pct}%</span>'
         f'</div>'
         for lbl, pct in top3
     )
@@ -476,13 +624,16 @@ def _render_result(prediction: str, probs: dict):
         f"""
         <div class="result-container">
             <h3>Analysis Result</h3>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem;">
-                <span style="background:{badge_bg};color:{badge_text};padding:3px 10px;border-radius:9999px;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:var(--font-sans);">{prediction}</span>
-                <span style="font-weight:600;font-size:1.05rem;color:var(--text-primary);">{explanation['name']}</span>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.9rem;">
+                <span style="display:inline-flex;align-items:center;gap:6px;background:{badge_bg};color:{badge_text};padding:5px 12px 5px 10px;border-radius:99px;font-size:0.71rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;font-family:var(--font-sans);">
+                    <span style="width:6px;height:6px;border-radius:50%;background:{badge_dot};flex-shrink:0;"></span>
+                    {prediction}
+                </span>
+                <span style="font-weight:600;font-size:1rem;color:var(--text-primary);">{explanation['name']}</span>
             </div>
-            <p style="color:var(--text-secondary);line-height:1.65;font-size:0.9rem;margin:0 0 1.25rem;">{explanation['description']}</p>
-            <div style="border-top:1px solid var(--border);padding-top:1rem;">
-                <p style="font-size:0.72rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-secondary);margin:0 0 0.6rem;">Top predictions</p>
+            <p style="color:var(--text-secondary);line-height:1.65;font-size:0.875rem;margin:0 0 1.5rem;">{explanation['description']}</p>
+            <div style="border-top:1px solid var(--border);padding-top:1.25rem;">
+                <p style="font-size:0.7rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-tertiary);margin:0 0 0.75rem;">Confidence breakdown</p>
                 {top3_html}
             </div>
         </div>
@@ -497,19 +648,21 @@ def _render_result(prediction: str, probs: dict):
 
 def _render_per_function(per_func: list[dict]):
     st.markdown(
-        '<p style="font-size:0.72rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-secondary);margin:1.5rem 0 0.5rem;">Per-function breakdown</p>',
+        '<p style="font-size:0.7rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-tertiary);margin:2rem 0 0.75rem;">Per-function breakdown</p>',
         unsafe_allow_html=True,
     )
     for i, item in enumerate(per_func, 1):
         pred = item["prediction"]
         expl = CWE_EXPLANATIONS[pred]
         is_safe = pred == "unknown"
-        badge_bg  = "#EDF3EC" if is_safe else "#FDEBEC"
-        badge_txt = "#346538" if is_safe else "#9F2F2D"
+        badge_bg  = "rgba(73,197,177,0.14)" if is_safe else "rgba(220,60,60,0.10)"
+        badge_txt = "#0d7a6a" if is_safe else "#a02020"
         with st.expander(f"fn {i}  ·  {pred}  ·  {expl['name']}"):
             st.markdown(
-                f'<span style="background:{badge_bg};color:{badge_txt};padding:2px 9px;border-radius:9999px;font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">{pred}</span>'
-                f'&nbsp;&nbsp;<span style="font-size:0.85rem;color:var(--text-secondary);">{expl["description"]}</span>',
+                f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem;">'
+                f'<span style="background:{badge_bg};color:{badge_txt};padding:4px 11px;border-radius:99px;font-size:0.7rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;">{pred}</span>'
+                f'<span style="font-size:0.84rem;color:var(--text-secondary);">{expl["description"]}</span>'
+                f'</div>',
                 unsafe_allow_html=True,
             )
             st.code(item["code"], language="python")
@@ -525,11 +678,14 @@ with tab_gcb:
     col1, col2 = st.columns([2, 1])
     with col2:
         st.markdown(
-            '<p style="font-size:0.72rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-secondary);margin:0 0 0.4rem;">Model</p>'
-            '<p style="font-size:1rem;font-weight:600;color:var(--dark-teal);margin:0 0 0.75rem;">GraphCodeBERT</p>'
-            '<p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.55;margin:0 0 1.25rem;">Single encoder fine-tuned with LoRA on 8 CWE classes. Upload a file to get per-function scores averaged into one result.</p>',
+            '<div class="model-panel">'
+            '<p style="font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal);margin:0 0 0.4rem;">Model</p>'
+            '<p style="font-size:1.05rem;font-weight:700;color:var(--dark-teal);margin:0 0 0.65rem;letter-spacing:-0.02em;">GraphCodeBERT</p>'
+            '<p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;margin:0 0 1.25rem;">Single encoder fine-tuned with LoRA on 8 CWE classes. Supports per-function scoring averaged into a single result.</p>'
+            '</div>',
             unsafe_allow_html=True,
         )
+        st.markdown('<div style="height:0.75rem"></div>', unsafe_allow_html=True)
         gcb_btn = st.button("Run Security Scan", key="btn_gcb", type="primary")
 
     with col1:
@@ -573,11 +729,14 @@ with tab_dual:
     col1, col2 = st.columns([2, 1])
     with col2:
         st.markdown(
-            '<p style="font-size:0.72rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-secondary);margin:0 0 0.4rem;">Model</p>'
-            '<p style="font-size:1rem;font-weight:600;color:var(--dark-teal);margin:0 0 0.75rem;">Dual Encoder</p>'
-            '<p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.55;margin:0 0 1.25rem;">Fusion of GraphCodeBERT (structural) and VulBERTa (security-specific). Upload a file to get per-function scores averaged into one result.</p>',
+            '<div class="model-panel">'
+            '<p style="font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal);margin:0 0 0.4rem;">Model</p>'
+            '<p style="font-size:1.05rem;font-weight:700;color:var(--dark-teal);margin:0 0 0.65rem;letter-spacing:-0.02em;">Dual Encoder</p>'
+            '<p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;margin:0 0 1.25rem;">Fusion of GraphCodeBERT (structural) and VulBERTa (security-specific). Supports per-function scoring averaged into a single result.</p>'
+            '</div>',
             unsafe_allow_html=True,
         )
+        st.markdown('<div style="height:0.75rem"></div>', unsafe_allow_html=True)
         dual_btn = st.button("Run Security Scan", key="btn_dual", type="primary")
 
     with col1:
@@ -621,20 +780,20 @@ with tab_dual:
 # FOOTER
 # ======================
 cards_html = "".join(
-    f'<div style="padding:16px 20px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);">'
-    f'<div style="font-size:0.875rem;font-weight:600;color:var(--text-primary);">{name}</div>'
-    f'<div style="font-size:0.78rem;color:var(--text-secondary);margin-top:2px;font-family:var(--font-mono);">{cid}</div>'
+    f'<div style="padding:18px 20px;border:1.5px solid var(--border);border-radius:20px;background:var(--surface);box-shadow:var(--shadow-sm);transition:border-color 150ms ease,box-shadow 150ms ease;">'
+    f'<div style="font-size:0.875rem;font-weight:600;color:var(--text-primary);margin-bottom:3px;">{name}</div>'
+    f'<div style="font-size:0.75rem;color:var(--text-tertiary);font-family:var(--font-mono);letter-spacing:0.03em;">{cid}</div>'
     f'</div>'
     for name, cid in CONTRIBUTORS
 )
 st.markdown(
     f"""
-    <div style="border-top:1px solid var(--border);padding-top:2.5rem;margin-top:3rem;">
-        <p style="font-size:0.72rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-secondary);margin:0 0 1.25rem;">Contributors</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.75rem;">
+    <div style="border-top:1px solid var(--border);padding-top:2.75rem;margin-top:3.5rem;">
+        <p style="font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-tertiary);margin:0 0 1.25rem;">Contributors</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:0.875rem;">
             {cards_html}
         </div>
-        <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:2rem;">
+        <p style="font-size:0.78rem;color:var(--text-tertiary);margin-top:2.5rem;letter-spacing:0.005em;">
             GraphCodeBERT Security Module &middot; 2026
         </p>
     </div>
