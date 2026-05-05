@@ -28,8 +28,7 @@ FROM python:3.12-slim AS hf-cache
 
 WORKDIR /app
 
-# Bring in uv and the venv from Stage 1
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+# Bring in the venv from Stage 1
 COPY --from=deps /app/.venv /app/.venv
 
 # Tell HuggingFace where to cache models
@@ -49,9 +48,6 @@ FROM python:3.12-slim AS final
 
 WORKDIR /app
 
-# Bring in uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
-
 # Copy venv from Stage 1
 COPY --from=deps /app/.venv /app/.venv
 
@@ -64,6 +60,11 @@ COPY weights/ ./weights/
 # Copy application code (changes frequently — keep last for cache efficiency)
 COPY app.py ./
 
+# Run as non-root user
+RUN useradd -m -u 1000 appuser \
+    && chown -R appuser:appuser /app /hf-cache
+USER appuser
+
 # Environment
 ENV VIRTUAL_ENV=/app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
@@ -74,7 +75,4 @@ ENV PORT=8501
 
 EXPOSE 8501
 
-ENTRYPOINT ["python", "-m", "streamlit", "run", "app.py", \
-            "--server.port=8501", \
-            "--server.address=0.0.0.0", \
-            "--server.headless=true"]
+ENTRYPOINT ["sh", "-c", "python -m streamlit run app.py --server.port=${PORT:-8501} --server.address=0.0.0.0 --server.headless=true"]
