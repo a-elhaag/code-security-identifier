@@ -27,38 +27,76 @@ MAX_LENGTH = 512
 NUM_CLASSES = 8
 
 CWE_LABELS = [
-    "CWE-077", "CWE-601", "CWE-022", "CWE-094",
-    "CWE-089", "CWE-352", "CWE-079", "unknown",
+    "CWE-077",
+    "CWE-601",
+    "CWE-022",
+    "CWE-094",
+    "CWE-089",
+    "CWE-352",
+    "CWE-079",
+    "unknown",
 ]
 
 CWE_EXPLANATIONS = {
-    "CWE-077": {"name": "Command Injection",         "description": "The code may allow untrusted input to influence an OS command."},
-    "CWE-601": {"name": "Open Redirect",             "description": "The code may redirect users to a URL controlled by an attacker."},
-    "CWE-022": {"name": "Path Traversal",            "description": "The code may allow input such as ../ to access files outside the intended directory."},
-    "CWE-094": {"name": "Code Injection",            "description": "The code may execute dynamically constructed code from unsafe input."},
-    "CWE-089": {"name": "SQL Injection",             "description": "The code may build SQL queries using untrusted input without safe parameterization."},
-    "CWE-352": {"name": "Cross-Site Request Forgery","description": "The code may allow a forged request to perform actions as an authenticated user."},
-    "CWE-079": {"name": "Cross-Site Scripting",      "description": "The code may place untrusted input into a web page without proper escaping."},
-    "unknown":  {"name": "No Vulnerability Detected","description": "The model did not map this snippet to any of the trained CWE classes."},
+    "CWE-077": {
+        "name": "Command Injection",
+        "description": "The code may allow untrusted input to influence an OS command.",
+    },
+    "CWE-601": {
+        "name": "Open Redirect",
+        "description": "The code may redirect users to a URL controlled by an attacker.",
+    },
+    "CWE-022": {
+        "name": "Path Traversal",
+        "description": "The code may allow input such as ../ to access files outside the intended directory.",
+    },
+    "CWE-094": {
+        "name": "Code Injection",
+        "description": "The code may execute dynamically constructed code from unsafe input.",
+    },
+    "CWE-089": {
+        "name": "SQL Injection",
+        "description": "The code may build SQL queries using untrusted input without safe parameterization.",
+    },
+    "CWE-352": {
+        "name": "Cross-Site Request Forgery",
+        "description": "The code may allow a forged request to perform actions as an authenticated user.",
+    },
+    "CWE-079": {
+        "name": "Cross-Site Scripting",
+        "description": "The code may place untrusted input into a web page without proper escaping.",
+    },
+    "unknown": {
+        "name": "No Vulnerability Detected",
+        "description": "The model did not map this snippet to any of the trained CWE classes.",
+    },
 }
 
 CONTRIBUTORS = [
-    ("Anas Ahmed",       "192200122"),
-    ("Youstina Adel",    "192200148"),
-    ("Sohaila Tamer",    "192200251"),
-    ("Farida Hassan",    "192200221"),
+    ("Anas Ahmed", "192200122"),
+    ("Youstina Adel", "192200148"),
+    ("Sohaila Tamer", "192200251"),
+    ("Farida Hassan", "192200221"),
     ("Jomana Mekheimar", "192200297"),
-    ("Menna Reda",       "192200325"),
-    ("Hend Elhout",      "192300146"),
-    ("Hesham Elshimy",   "192200154"),
+    ("Menna Reda", "192200325"),
+    ("Hend Elhout", "192300146"),
+    ("Mennatallah Amr ", "192200361"),
+    ("Hesham Elshimy", "192200154"),
 ]
 
 # ======================
 # MODEL CLASSES
 # ======================
 
+
 class GraphCodeBERTLoRACWEModel(nn.Module):
-    def __init__(self, use_lora: bool = True, lora_r: int = 8, lora_alpha: int = 32, lora_dropout: float = 0.1):
+    def __init__(
+        self,
+        use_lora: bool = True,
+        lora_r: int = 8,
+        lora_alpha: int = 32,
+        lora_dropout: float = 0.1,
+    ):
         super().__init__()
         encoder = AutoModel.from_pretrained(GCB_MODEL_NAME)
         if use_lora:
@@ -66,17 +104,22 @@ class GraphCodeBERTLoRACWEModel(nn.Module):
                 raise RuntimeError("peft is not installed.")
             lora_cfg = LoraConfig(
                 task_type=TaskType.FEATURE_EXTRACTION,
-                r=lora_r, lora_alpha=lora_alpha, lora_dropout=lora_dropout,
-                target_modules=["query", "key", "value"], bias="none",
+                r=lora_r,
+                lora_alpha=lora_alpha,
+                lora_dropout=lora_dropout,
+                target_modules=["query", "key", "value"],
+                bias="none",
             )
             encoder = get_peft_model(encoder, lora_cfg)
         self.encoder = encoder
         hidden = 768
-        self.cwe_head = nn.ModuleDict({
-            "norm": nn.LayerNorm(hidden),
-            "fc1":  nn.Linear(hidden, hidden // 2),
-            "fc2":  nn.Linear(hidden // 2, NUM_CLASSES),
-        })
+        self.cwe_head = nn.ModuleDict(
+            {
+                "norm": nn.LayerNorm(hidden),
+                "fc1": nn.Linear(hidden, hidden // 2),
+                "fc2": nn.Linear(hidden // 2, NUM_CLASSES),
+            }
+        )
         self.act = nn.GELU()
 
     @staticmethod
@@ -105,15 +148,20 @@ class _FusionProjection(nn.Module):
 
 
 class VulBERTaFusionModel(nn.Module):
-    def __init__(self, lora_r: int = 16, lora_alpha: int = 32, lora_dropout: float = 0.05):
+    def __init__(
+        self, lora_r: int = 16, lora_alpha: int = 32, lora_dropout: float = 0.05
+    ):
         super().__init__()
         gcb = AutoModel.from_pretrained(GCB_MODEL_NAME)
         if get_peft_model is None:
             raise RuntimeError("peft is not installed.")
         lora_cfg = LoraConfig(
             task_type=TaskType.FEATURE_EXTRACTION,
-            r=lora_r, lora_alpha=lora_alpha, lora_dropout=lora_dropout,
-            target_modules=["query", "key", "value"], bias="none",
+            r=lora_r,
+            lora_alpha=lora_alpha,
+            lora_dropout=lora_dropout,
+            target_modules=["query", "key", "value"],
+            bias="none",
         )
         self.graphcodebert = get_peft_model(gcb, lora_cfg)
         self.vulberta = RobertaModel.from_pretrained(VULB_MODEL_NAME)
@@ -121,13 +169,21 @@ class VulBERTaFusionModel(nn.Module):
             p.requires_grad = False
         self.fusion = _FusionProjection()
         self.classifier = nn.Sequential(
-            nn.Linear(768, 384), nn.GELU(), nn.Dropout(0.1),
+            nn.Linear(768, 384),
+            nn.GELU(),
+            nn.Dropout(0.1),
             nn.Linear(384, NUM_CLASSES),
         )
 
-    def forward(self, gcb_input_ids, gcb_attention_mask, vulb_input_ids, vulb_attention_mask):
-        gcb_cls  = self.graphcodebert(input_ids=gcb_input_ids,  attention_mask=gcb_attention_mask).last_hidden_state[:, 0]
-        vulb_cls = self.vulberta(     input_ids=vulb_input_ids, attention_mask=vulb_attention_mask).last_hidden_state[:, 0]
+    def forward(
+        self, gcb_input_ids, gcb_attention_mask, vulb_input_ids, vulb_attention_mask
+    ):
+        gcb_cls = self.graphcodebert(
+            input_ids=gcb_input_ids, attention_mask=gcb_attention_mask
+        ).last_hidden_state[:, 0]
+        vulb_cls = self.vulberta(
+            input_ids=vulb_input_ids, attention_mask=vulb_attention_mask
+        ).last_hidden_state[:, 0]
         fused = self.fusion(torch.cat([gcb_cls, vulb_cls], dim=-1))
         return {"logits": self.classifier(fused)}
 
@@ -135,6 +191,7 @@ class VulBERTaFusionModel(nn.Module):
 # ======================
 # DEVICE & LOADERS
 # ======================
+
 
 def _get_device():
     if torch.cuda.is_available():
@@ -151,14 +208,16 @@ def load_gcb_assets():
         raise FileNotFoundError(f"Checkpoint not found: {GCB_CHECKPOINT}")
     ckpt = torch.load(GCB_CHECKPOINT, map_location=device, weights_only=False)
     state = ckpt.get("model_state_dict") or ckpt.get("state_dict") or ckpt
-    cfg   = ckpt.get("cfg", {}) if isinstance(ckpt, dict) else {}
+    cfg = ckpt.get("cfg", {}) if isinstance(ckpt, dict) else {}
     max_len = int(cfg.get("max_length", MAX_LENGTH))
-    lora_r  = int(cfg.get("lora_r", 8))
+    lora_r = int(cfg.get("lora_r", 8))
 
     model = GraphCodeBERTLoRACWEModel(use_lora=True, lora_r=lora_r)
     result = model.load_state_dict(state, strict=False)
     if result.missing_keys or result.unexpected_keys:
-        st.warning(f"GCB load: missing={result.missing_keys[:5]}, unexpected={result.unexpected_keys[:5]}")
+        st.warning(
+            f"GCB load: missing={result.missing_keys[:5]}, unexpected={result.unexpected_keys[:5]}"
+        )
     model.to(device).eval()
     tokenizer = RobertaTokenizer.from_pretrained(GCB_MODEL_NAME)
     return tokenizer, model, device, max_len
@@ -169,23 +228,30 @@ def load_dual_assets():
     device = _get_device()
     if not DUAL_CHECKPOINT.exists():
         raise FileNotFoundError(f"Checkpoint not found: {DUAL_CHECKPOINT}")
-    ckpt  = torch.load(DUAL_CHECKPOINT, map_location=device, weights_only=False)
-    state = ckpt.get("model_state") or ckpt.get("model_state_dict") or ckpt.get("state_dict") or ckpt
+    ckpt = torch.load(DUAL_CHECKPOINT, map_location=device, weights_only=False)
+    state = (
+        ckpt.get("model_state")
+        or ckpt.get("model_state_dict")
+        or ckpt.get("state_dict")
+        or ckpt
+    )
 
     key_map = {
-        "fusion.proj.weight":  "fusion.projection.0.weight",
-        "fusion.proj.bias":    "fusion.projection.0.bias",
-        "fusion.norm.weight":  "fusion.projection.1.weight",
-        "fusion.norm.bias":    "fusion.projection.1.bias",
+        "fusion.proj.weight": "fusion.projection.0.weight",
+        "fusion.proj.bias": "fusion.projection.0.bias",
+        "fusion.norm.weight": "fusion.projection.1.weight",
+        "fusion.norm.bias": "fusion.projection.1.bias",
     }
     state = {key_map.get(k, k): v for k, v in state.items()}
 
     model = VulBERTaFusionModel()
     result = model.load_state_dict(state, strict=False)
     if result.missing_keys or result.unexpected_keys:
-        st.warning(f"Dual load: missing={result.missing_keys[:5]}, unexpected={result.unexpected_keys[:5]}")
+        st.warning(
+            f"Dual load: missing={result.missing_keys[:5]}, unexpected={result.unexpected_keys[:5]}"
+        )
     model.to(device).eval()
-    gcb_tok  = RobertaTokenizer.from_pretrained(GCB_MODEL_NAME)
+    gcb_tok = RobertaTokenizer.from_pretrained(GCB_MODEL_NAME)
     vulb_tok = AutoTokenizer.from_pretrained(VULB_MODEL_NAME)
     return gcb_tok, vulb_tok, model, device
 
@@ -194,33 +260,59 @@ def load_dual_assets():
 # INFERENCE
 # ======================
 
+
 def predict_gcb(code: str):
     tokenizer, model, device, max_len = load_gcb_assets()
-    enc = tokenizer(code, max_length=max_len, padding="max_length", truncation=True, return_tensors="pt").to(device)
+    enc = tokenizer(
+        code,
+        max_length=max_len,
+        padding="max_length",
+        truncation=True,
+        return_tensors="pt",
+    ).to(device)
     with torch.no_grad():
         logits = model(enc["input_ids"], enc["attention_mask"])["logits"]
-        probs  = torch.softmax(logits, dim=-1)[0].cpu().tolist()
+        probs = torch.softmax(logits, dim=-1)[0].cpu().tolist()
     idx = probs.index(max(probs))
-    return CWE_LABELS[idx], {CWE_LABELS[i]: round(p * 100, 1) for i, p in enumerate(probs)}
+    return CWE_LABELS[idx], {
+        CWE_LABELS[i]: round(p * 100, 1) for i, p in enumerate(probs)
+    }
 
 
 def predict_dual(code: str):
     gcb_tok, vulb_tok, model, device = load_dual_assets()
-    gcb_enc  = gcb_tok( code, max_length=MAX_LENGTH, padding="max_length", truncation=True, return_tensors="pt").to(device)
-    vulb_enc = vulb_tok(code, max_length=MAX_LENGTH, padding="max_length", truncation=True, return_tensors="pt").to(device)
+    gcb_enc = gcb_tok(
+        code,
+        max_length=MAX_LENGTH,
+        padding="max_length",
+        truncation=True,
+        return_tensors="pt",
+    ).to(device)
+    vulb_enc = vulb_tok(
+        code,
+        max_length=MAX_LENGTH,
+        padding="max_length",
+        truncation=True,
+        return_tensors="pt",
+    ).to(device)
     with torch.no_grad():
         logits = model(
-            gcb_enc["input_ids"],  gcb_enc["attention_mask"],
-            vulb_enc["input_ids"], vulb_enc["attention_mask"],
+            gcb_enc["input_ids"],
+            gcb_enc["attention_mask"],
+            vulb_enc["input_ids"],
+            vulb_enc["attention_mask"],
         )["logits"]
         probs = torch.softmax(logits, dim=-1)[0].cpu().tolist()
     idx = probs.index(max(probs))
-    return CWE_LABELS[idx], {CWE_LABELS[i]: round(p * 100, 1) for i, p in enumerate(probs)}
+    return CWE_LABELS[idx], {
+        CWE_LABELS[i]: round(p * 100, 1) for i, p in enumerate(probs)
+    }
 
 
 # ======================
 # FUNCTION SPLITTING & MULTI-FUNCTION PIPELINE
 # ======================
+
 
 def split_functions(code: str) -> list[str]:
     parts = re.split(r"^(?=(?:async\s+)?def\s)", code, flags=re.MULTILINE)
@@ -598,25 +690,29 @@ def _render_result(prediction: str, probs: dict):
     is_safe = prediction == "unknown"
 
     if is_safe:
-        badge_bg   = "rgba(73,197,177,0.14)"
+        badge_bg = "rgba(73,197,177,0.14)"
         badge_text = "#0d7a6a"
         badge_label = "✓ Secure"
     else:
-        badge_bg   = "rgba(220,60,60,0.10)"
+        badge_bg = "rgba(220,60,60,0.10)"
         badge_text = "#a02020"
         badge_label = prediction
 
     top3 = sorted(probs.items(), key=lambda x: x[1], reverse=True)[:3]
-    bar_fill = "linear-gradient(90deg,#49c5b1,#d4ec8e)" if is_safe else "linear-gradient(90deg,#e05c5c,#f0a060)"
+    bar_fill = (
+        "linear-gradient(90deg,#49c5b1,#d4ec8e)"
+        if is_safe
+        else "linear-gradient(90deg,#e05c5c,#f0a060)"
+    )
 
     top3_html = "".join(
         f'<div style="display:flex;align-items:center;gap:14px;margin:10px 0;">'
         f'<span style="width:72px;font-size:0.76rem;font-weight:600;color:var(--text-secondary);font-family:var(--font-mono);letter-spacing:0.03em;flex-shrink:0;">{lbl}</span>'
         f'<div style="flex:1;background:#edeeed;border-radius:99px;height:6px;overflow:hidden;">'
         f'<div style="width:{pct}%;background:{bar_fill};border-radius:99px;height:6px;transition:width 500ms cubic-bezier(0.16,1,0.3,1);"></div>'
-        f'</div>'
+        f"</div>"
         f'<span style="font-size:0.76rem;font-weight:600;color:var(--text-secondary);width:36px;text-align:right;font-family:var(--font-mono);">{pct}%</span>'
-        f'</div>'
+        f"</div>"
         for lbl, pct in top3
     )
 
@@ -645,6 +741,7 @@ def _render_result(prediction: str, probs: dict):
 # HELPER: per-function breakdown renderer
 # ======================
 
+
 def _render_per_function(per_func: list[dict]):
     st.markdown(
         '<p style="font-size:0.7rem;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-tertiary);margin:2rem 0 0.75rem;">Per-function breakdown</p>',
@@ -654,14 +751,14 @@ def _render_per_function(per_func: list[dict]):
         pred = item["prediction"]
         expl = CWE_EXPLANATIONS[pred]
         is_safe = pred == "unknown"
-        badge_bg  = "rgba(73,197,177,0.14)" if is_safe else "rgba(220,60,60,0.10)"
+        badge_bg = "rgba(73,197,177,0.14)" if is_safe else "rgba(220,60,60,0.10)"
         badge_txt = "#0d7a6a" if is_safe else "#a02020"
         with st.expander(f"fn {i}  ·  {pred}  ·  {expl['name']}"):
             st.markdown(
                 f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem;">'
                 f'<span style="background:{badge_bg};color:{badge_txt};padding:4px 11px;border-radius:99px;font-size:0.7rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;">{pred}</span>'
                 f'<span style="font-size:0.84rem;color:var(--text-secondary);">{expl["description"]}</span>'
-                f'</div>',
+                f"</div>",
                 unsafe_allow_html=True,
             )
             st.code(item["code"], language="python")
@@ -681,7 +778,7 @@ with tab_gcb:
             '<p style="font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal);margin:0 0 0.4rem;">Model</p>'
             '<p style="font-size:1.05rem;font-weight:700;color:var(--dark-teal);margin:0 0 0.65rem;letter-spacing:-0.02em;">GraphCodeBERT</p>'
             '<p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;margin:0 0 1.25rem;">Single encoder fine-tuned with LoRA on 8 CWE classes. Supports per-function scoring averaged into a single result.</p>'
-            '</div>',
+            "</div>",
             unsafe_allow_html=True,
         )
         st.markdown('<div style="height:0.75rem"></div>', unsafe_allow_html=True)
@@ -691,12 +788,19 @@ with tab_gcb:
         gcb_sub_paste, gcb_sub_upload = st.tabs(["Paste Code", "Upload File"])
         with gcb_sub_paste:
             gcb_paste = st.text_area(
-                "gcb_paste", height=300,
+                "gcb_paste",
+                height=300,
                 placeholder="Paste your code snippet here...",
-                label_visibility="collapsed", key="gcb_paste",
+                label_visibility="collapsed",
+                key="gcb_paste",
             )
         with gcb_sub_upload:
-            gcb_file = st.file_uploader("Upload .py file", type=["py"], key="gcb_file", label_visibility="collapsed")
+            gcb_file = st.file_uploader(
+                "Upload .py file",
+                type=["py"],
+                key="gcb_file",
+                label_visibility="collapsed",
+            )
 
     if gcb_btn:
         code = ""
@@ -710,13 +814,21 @@ with tab_gcb:
             try:
                 funcs = split_functions(code)
                 is_multifunction = len(funcs) > 1
-                with st.spinner(f"Analyzing {len(funcs)} function(s)..." if is_multifunction else "Analyzing..."):
+                with st.spinner(
+                    f"Analyzing {len(funcs)} function(s)..."
+                    if is_multifunction
+                    else "Analyzing..."
+                ):
                     if is_multifunction:
                         per_func, avg_probs, overall = analyze_file_gcb(code)
                     else:
                         overall, avg_probs = predict_gcb(code)
                         per_func = None
-                st.markdown(f"**{len(funcs)} function(s) detected — overall result (averaged):**" if is_multifunction else "**Result:**")
+                st.markdown(
+                    f"**{len(funcs)} function(s) detected — overall result (averaged):**"
+                    if is_multifunction
+                    else "**Result:**"
+                )
                 _render_result(overall, avg_probs)
                 if per_func:
                     _render_per_function(per_func)
@@ -732,7 +844,7 @@ with tab_dual:
             '<p style="font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal);margin:0 0 0.4rem;">Model</p>'
             '<p style="font-size:1.05rem;font-weight:700;color:var(--dark-teal);margin:0 0 0.65rem;letter-spacing:-0.02em;">Dual Encoder</p>'
             '<p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;margin:0 0 1.25rem;">Fusion of GraphCodeBERT (structural) and VulBERTa (security-specific). Supports per-function scoring averaged into a single result.</p>'
-            '</div>',
+            "</div>",
             unsafe_allow_html=True,
         )
         st.markdown('<div style="height:0.75rem"></div>', unsafe_allow_html=True)
@@ -742,12 +854,19 @@ with tab_dual:
         dual_sub_paste, dual_sub_upload = st.tabs(["Paste Code", "Upload File"])
         with dual_sub_paste:
             dual_paste = st.text_area(
-                "dual_paste", height=300,
+                "dual_paste",
+                height=300,
                 placeholder="Paste your code snippet here...",
-                label_visibility="collapsed", key="dual_paste",
+                label_visibility="collapsed",
+                key="dual_paste",
             )
         with dual_sub_upload:
-            dual_file = st.file_uploader("Upload .py file", type=["py"], key="dual_file", label_visibility="collapsed")
+            dual_file = st.file_uploader(
+                "Upload .py file",
+                type=["py"],
+                key="dual_file",
+                label_visibility="collapsed",
+            )
 
     if dual_btn:
         code = ""
@@ -761,13 +880,21 @@ with tab_dual:
             try:
                 funcs = split_functions(code)
                 is_multifunction = len(funcs) > 1
-                with st.spinner(f"Analyzing {len(funcs)} function(s)..." if is_multifunction else "Analyzing..."):
+                with st.spinner(
+                    f"Analyzing {len(funcs)} function(s)..."
+                    if is_multifunction
+                    else "Analyzing..."
+                ):
                     if is_multifunction:
                         per_func, avg_probs, overall = analyze_file_dual(code)
                     else:
                         overall, avg_probs = predict_dual(code)
                         per_func = None
-                st.markdown(f"**{len(funcs)} function(s) detected — overall result (averaged):**" if is_multifunction else "**Result:**")
+                st.markdown(
+                    f"**{len(funcs)} function(s) detected — overall result (averaged):**"
+                    if is_multifunction
+                    else "**Result:**"
+                )
                 _render_result(overall, avg_probs)
                 if per_func:
                     _render_per_function(per_func)
@@ -782,7 +909,7 @@ cards_html = "".join(
     f'<div style="padding:18px 20px;border:1.5px solid var(--border);border-radius:20px;background:var(--surface);box-shadow:var(--shadow-sm);transition:border-color 150ms ease,box-shadow 150ms ease;">'
     f'<div style="font-size:0.875rem;font-weight:600;color:var(--text-primary);margin-bottom:3px;">{name}</div>'
     f'<div style="font-size:0.75rem;color:var(--text-tertiary);font-family:var(--font-mono);letter-spacing:0.03em;">{cid}</div>'
-    f'</div>'
+    f"</div>"
     for name, cid in CONTRIBUTORS
 )
 st.markdown(
