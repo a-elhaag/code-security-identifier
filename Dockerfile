@@ -20,29 +20,8 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 # =============================================================================
-# Stage 2: hf-cache
-# Pre-download HuggingFace model files into /hf-cache
-# Only invalidates when Stage 1 changes (i.e., deps change)
-# =============================================================================
-FROM python:3.12-slim AS hf-cache
-
-WORKDIR /app
-
-# Bring in the venv from Stage 1
-COPY --from=deps /app/.venv /app/.venv
-
-# Tell HuggingFace where to cache models
-ENV HF_HOME=/hf-cache
-ENV VIRTUAL_ENV=/app/.venv
-ENV PATH="/app/.venv/bin:$PATH"
-
-# Copy and run the preload script
-COPY scripts/preload_hf_models.py ./scripts/preload_hf_models.py
-RUN python scripts/preload_hf_models.py
-
-# =============================================================================
-# Stage 3: final
-# Assemble the production image
+# Stage 2: final
+# Assemble the production image with local HF cache
 # =============================================================================
 FROM python:3.12-slim AS final
 
@@ -51,8 +30,8 @@ WORKDIR /app
 # Copy venv from Stage 1
 COPY --from=deps /app/.venv /app/.venv
 
-# Copy HuggingFace model cache from Stage 2
-COPY --from=hf-cache /hf-cache /hf-cache
+# Copy pre-cached HuggingFace models from local hf-cache directory
+COPY hf-cache /hf-cache
 
 # Copy local model weights (~1.5 GB — this layer changes rarely)
 COPY weights/ ./weights/
