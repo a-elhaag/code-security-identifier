@@ -600,11 +600,11 @@ def _render_result(prediction: str, probs: dict):
     if is_safe:
         badge_bg   = "rgba(73,197,177,0.14)"
         badge_text = "#0d7a6a"
-        badge_dot  = "#49c5b1"
+        badge_label = "✓ Secure"
     else:
         badge_bg   = "rgba(220,60,60,0.10)"
         badge_text = "#a02020"
-        badge_dot  = "#dc3c3c"
+        badge_label = prediction
 
     top3 = sorted(probs.items(), key=lambda x: x[1], reverse=True)[:3]
     bar_fill = "linear-gradient(90deg,#49c5b1,#d4ec8e)" if is_safe else "linear-gradient(90deg,#e05c5c,#f0a060)"
@@ -626,8 +626,7 @@ def _render_result(prediction: str, probs: dict):
             <h3>Analysis Result</h3>
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.9rem;">
                 <span style="display:inline-flex;align-items:center;gap:6px;background:{badge_bg};color:{badge_text};padding:5px 12px 5px 10px;border-radius:99px;font-size:0.71rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;font-family:var(--font-sans);">
-                    <span style="width:6px;height:6px;border-radius:50%;background:{badge_dot};flex-shrink:0;"></span>
-                    {prediction}
+                    {badge_label}
                 </span>
                 <span style="font-weight:600;font-size:1rem;color:var(--text-primary);">{explanation['name']}</span>
             </div>
