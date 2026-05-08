@@ -58,10 +58,9 @@ htmlcov/
 # ── Models & large files ─────────────────────────────────────────────────────
 models/*.bin
 models/*.safetensors
-*.pt
-*.pth
-*.pkl
 hf-cache/
+token_cache/
+.claude/
 
 # ── Temp files ───────────────────────────────────────────────────────────────
 *.tmp

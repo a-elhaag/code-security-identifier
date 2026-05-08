@@ -1,17 +1,31 @@
 # Code Security Identifier (CSI)
 
-**Python vulnerability detection system targeting 75%+ F1 on DetectVul benchmark.**
+Static vulnerability detection for Python code using GraphCodeBERT and VulBERTa models.
 
-## Overview
+## Quick Start
 
-CSI performs simultaneous multi-task vulnerability detection on Python code:
+```bash
+python setup.py
+```
 
-- **Binary classification**: vulnerable vs. secure
-- **CWE classification**: maps to specific weakness types
-- **Severity scoring**: CVSS-style risk quantification
-- **Line-level localization**: pinpoints exact vulnerable code statements
+That's it! The script will:
+1. Install dependencies
+2. Download models (~750MB)
+3. Launch the app at http://localhost:8501
 
-Built by 9-person academic team using GraphCodeBERT + LoRA fine-tuning, supervised contrastive learning (SCL-CVD), and adversarial training (EDAT).
+## Features
+
+- **GraphCodeBERT Model** - Fast, single-encoder vulnerability detection
+- **Dual Encoder** - Fusion of GraphCodeBERT + VulBERTa for higher accuracy
+- **8 CWE Classes** - Detects common Python vulnerabilities:
+  - CWE-077: Command Injection
+  - CWE-601: Open Redirect
+  - CWE-022: Path Traversal
+  - CWE-094: Code Injection
+  - CWE-089: SQL Injection
+  - CWE-352: CSRF
+  - CWE-079: XSS
+  - Unknown: No vulnerability detected
 
 ## Architecture
 
